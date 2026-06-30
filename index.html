@@ -6,7 +6,7 @@
 -->
 <html>
 	<head>
-		<title>Aerial by HTML5 UP</title>
+		<title>kotke.de</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="assets/css/main.css" />
@@ -21,18 +21,18 @@
 				<!-- Header -->
 					<header id="header">
 						<h1>kotke.de</h1>
-						<p>Security Chief &nbsp;&bull;&nbsp; Cyborg &nbsp;&bull;&nbsp; Never asked for this</p>
-						<!--
-						<nav>
-							<ul>
-								<li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
-								<li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
-								<li><a href="#" class="icon brands fa-dribbble"><span class="label">Dribbble</span></a></li>
-								<li><a href="#" class="icon brands fa-github"><span class="label">Github</span></a></li>
-								<li><a href="#" class="icon solid fa-envelope"><span class="label">Email</span></a></li>
-							</ul>
-						</nav>
-						-->
+						
+						<section id="zitat-box">
+							<blockquote id="quote">
+								Lade Zitat...
+							</blockquote>
+
+							<p id="author"></p>
+
+							<button id="reload-btn" aria-label="Neues Zitat laden">
+								⟳
+							</button>
+						</section>
 					</header>
 
 				<!-- Footer -->
@@ -47,5 +47,34 @@
 			window.ontouchmove = function() { return false; }
 			window.onorientationchange = function() { document.body.scrollTop = 0; }
 		</script>
+		<script>
+			async function ladeZitat() {
+				try {
+					const response = await fetch(
+						'https://api.zitat-service.de/v1/quote?language=de'
+					);
+
+					const data = await response.json();
+
+					document.getElementById('quote').textContent =
+						'„' + data.quote + '“';
+
+					document.getElementById('author').textContent =
+						data.author
+							? '— ' + data.author
+							: '';
+
+				} catch (error) {
+					document.getElementById('quote').textContent =
+						'Zitat konnte nicht geladen werden.';
+					document.getElementById('author').textContent = '';
+				}
+			}
+
+			document
+				.getElementById('reload-btn')
+				.addEventListener('click', ladeZitat);
+			ladeZitat();
+			</script>
 	</body>
 </html>
