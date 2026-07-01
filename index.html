@@ -26,7 +26,7 @@
 							<blockquote id="quote">
 								Lade Zitat...
 							</blockquote>
-							
+							<p id="author"></p>
 							<button id="reload-btn" aria-label="Neues Zitat laden">
 								⟳
 							</button>
@@ -58,9 +58,7 @@
 						'„' + data.quote + '“';
 
 					document.getElementById('author').textContent =
-						data.author
-							? '— ' + data.author
-							: '';
+    					'— ' + data.authorName;
 
 				} catch (error) {
 					document.getElementById('quote').textContent =
