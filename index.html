@@ -47,24 +47,26 @@
 		</script>
 		<script>
 			async function ladeZitat() {
-				try {
-					const response = await fetch(
-						'https://api.zitat-service.de/v1/quote?language=de'
-					);
-
-					const data = await response.json();
-
-					document.getElementById('quote').textContent =
-						'„' + data.quote + '“';
-
-					document.getElementById('author').textContent =
-    					'— ' + data.authorName;
-
-				} catch (error) {
-					document.getElementById('quote').textContent =
-						'Zitat konnte nicht geladen werden.';
-					document.getElementById('author').textContent = '';
-				}
+			    try {
+			        const response = await fetch(
+			            'https://api.zitat-service.de/v1/quote?language=de'
+			        );
+			
+			        const data = await response.json();
+			
+			        document.getElementById('quote').textContent =
+			            '„' + data.quote + '“';
+			
+			        document.getElementById('author').textContent =
+			            data.authorName
+			                ? '— ' + data.authorName
+			                : '';
+			
+			    } catch (error) {
+			        document.getElementById('quote').textContent =
+			            'Zitat konnte nicht geladen werden.';
+			        document.getElementById('author').textContent = '';
+			    }
 			}
 
 			document
