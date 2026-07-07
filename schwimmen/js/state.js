@@ -18,8 +18,7 @@ export const state = {
     active: false,
     finished: false,
     mode: 'last',
-    specialId: null,     // Gewinner (mode 'last') oder Verlierer (mode 'firstOut')
-    players: []          // [{ id, lives, maxLives, out }]
+    players: []          // [{ id, lives, maxLives, out, safe }]
   },
   nextId: 1,
   currentScreen: 'lobby'
@@ -46,7 +45,7 @@ export function loadLocalState(){
       state.roster = data.roster;
       state.startLives = data.startLives || 3;
       state.mode = data.mode === 'firstOut' ? 'firstOut' : 'last';
-      state.round = data.round || { active:false, finished:false, mode:'last', specialId:null, players:[] };
+      state.round = data.round || { active:false, finished:false, mode:'last', players:[] };
       state.nextId = data.nextId || (state.roster.length + 1);
       return true;
     }
@@ -56,7 +55,7 @@ export function loadLocalState(){
 
 export function clearAll(){
   state.roster = [];
-  state.round = { active:false, finished:false, mode:'last', specialId:null, players:[] };
+  state.round = { active:false, finished:false, mode:'last', players:[] };
   state.startLives = 3;
   state.mode = 'last';
   try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}

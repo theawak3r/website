@@ -248,6 +248,10 @@ button{ touch-action:manipulation; user-select:none; -webkit-user-select:none; }
   transition:opacity .3s ease, filter .3s ease;
 }
 .tile.out{ opacity:0.5; filter:grayscale(0.7); }
+.tile.safe{
+  border-color: rgba(50,215,75,0.4);
+  box-shadow: 0 0 0 1px rgba(50,215,75,0.25) inset;
+}
 
 .tile-top{ display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:12px; gap:6px; }
 .tile-name{
@@ -315,15 +319,32 @@ button{ touch-action:manipulation; user-select:none; -webkit-user-select:none; }
 .minus-btn:active:not(:disabled){ opacity:0.7; transform:scale(0.98); }
 .minus-btn:disabled{ opacity:0.28; cursor:not-allowed; }
 
+.safe-btn{
+  width:100%; margin-top:8px; padding:9px; border-radius:9px;
+  background:rgba(50,215,75,0.1); border:1px solid rgba(50,215,75,0.32);
+  color:var(--green); font-size:12.5px; font-weight:600;
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  cursor:pointer; transition:background .15s ease, opacity .12s ease, transform .1s ease, border-color .15s ease;
+}
+.safe-btn svg{ width:14px; height:14px; flex-shrink:0; }
+.safe-btn:active:not(:disabled){ opacity:0.7; transform:scale(0.98); }
+.safe-btn:disabled{ opacity:0.28; cursor:not-allowed; }
+.safe-btn.is-active{
+  background:rgba(50,215,75,0.2); border-color:var(--green);
+}
+
 .stamp{
   position:absolute; top:40%; left:50%;
   transform:translate(-50%,-50%) rotate(-16deg);
   font-family:'Fraunces', serif; font-weight:700; font-size:19px;
-  color:var(--red); border:2.5px solid var(--red); border-radius:8px;
+  border-radius:8px;
   padding:2px 9px; letter-spacing:1.5px;
   opacity:0; pointer-events:none; transition:opacity .3s ease;
 }
-.tile.out .stamp{ opacity:0.9; }
+.stamp.raus-stamp{ color:var(--red); border:2.5px solid var(--red); }
+.stamp.safe-stamp{ color:var(--green); border:2.5px solid var(--green); transform:translate(-50%,-50%) rotate(11deg); }
+.tile.out .stamp.raus-stamp{ opacity:0.9; }
+.tile.safe .stamp.safe-stamp{ opacity:0.9; }
 
 /* ---------- bottom sheets ---------- */
 .sheet-backdrop{

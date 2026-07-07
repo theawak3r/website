@@ -1,4 +1,4 @@
-const CACHE_NAME = 'schwimmen-leben-v5';
+const CACHE_NAME = 'schwimmen-leben-v6';
 const ASSETS = [
   './',
   './index.html',
@@ -10,6 +10,7 @@ const ASSETS = [
   './js/lobby.js',
   './js/game.js',
   './js/overview.js',
+  './js/wakelock.js',
   './js/main.js',
   './icon-192.png',
   './icon-512.png',
