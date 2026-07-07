@@ -1,5 +1,5 @@
 :root{
-  --bg:#07231A;
+  --bg:#081B2E;
   --surface: rgba(255,255,255,0.055);
   --surface-2: rgba(255,255,255,0.09);
   --surface-3: rgba(255,255,255,0.13);
@@ -7,7 +7,7 @@
   --cream:#F3ECDD;
   --cream-dim: rgba(243,236,221,0.56);
   --cream-faint: rgba(243,236,221,0.34);
-  --ink:#12261D;
+  --ink:#0F2033;
   --brass:#C9A227;
   --brass-bright:#E7C761;
   --red:#FF453A;
@@ -16,10 +16,11 @@
   --nav-h: 52px;
 }
 *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-html{ height:100%; }
+html{ height:100%; touch-action:manipulation; }
 body{
   margin:0;
   min-height:100%;
+  touch-action:manipulation;
   background:
     radial-gradient(ellipse 900px 500px at 50% -10%, rgba(255,255,255,0.05), transparent 60%),
     var(--bg);
@@ -36,7 +37,7 @@ button{ touch-action:manipulation; user-select:none; -webkit-user-select:none; }
 .topbar{
   position:fixed; top:0; left:0; right:0; z-index:20;
   padding-top:env(safe-area-inset-top);
-  background:rgba(7,35,26,0.72);
+  background:rgba(8,27,46,0.72);
   -webkit-backdrop-filter:blur(20px) saturate(160%);
   backdrop-filter:blur(20px) saturate(160%);
   border-bottom:1px solid var(--hairline);
@@ -364,7 +365,7 @@ button{ touch-action:manipulation; user-select:none; -webkit-user-select:none; }
 .sheet{
   position:fixed; left:0; right:0; bottom:0; z-index:41;
   max-width:760px; margin:0 auto;
-  background:#0E2E22;
+  background:#0D2740;
   border:1px solid var(--hairline);
   border-bottom:none;
   border-radius:22px 22px 0 0;

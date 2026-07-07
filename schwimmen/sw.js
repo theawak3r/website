@@ -1,4 +1,4 @@
-const CACHE_NAME = 'schwimmen-leben-v6';
+const CACHE_NAME = 'schwimmen-leben-v7';
 const ASSETS = [
   './',
   './index.html',
