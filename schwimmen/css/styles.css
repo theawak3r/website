@@ -273,6 +273,11 @@ button{ touch-action:manipulation; user-select:none; -webkit-user-select:none; }
   display:flex; align-items:flex-end;
   height:52px; padding:0 6px 4px 2px;
   margin-bottom:14px;
+  transition:opacity .35s ease, filter .35s ease;
+}
+.tile.safe .cards-fan{
+  opacity:0.3;
+  filter:saturate(0.5) grayscale(0.2);
 }
 .life-card{
   --fan-rotate: 0deg;
@@ -320,17 +325,18 @@ button{ touch-action:manipulation; user-select:none; -webkit-user-select:none; }
 .minus-btn:disabled{ opacity:0.28; cursor:not-allowed; }
 
 .safe-btn{
-  width:100%; margin-top:8px; padding:9px; border-radius:9px;
-  background:rgba(50,215,75,0.1); border:1px solid rgba(50,215,75,0.32);
-  color:var(--green); font-size:12.5px; font-weight:600;
-  display:flex; align-items:center; justify-content:center; gap:6px;
-  cursor:pointer; transition:background .15s ease, opacity .12s ease, transform .1s ease, border-color .15s ease;
+  width:100%; margin-top:8px; padding:7px; border-radius:8px;
+  background:transparent; border:1px dashed rgba(255,255,255,0.16);
+  color:var(--cream-faint); font-size:11.5px; font-weight:500;
+  display:flex; align-items:center; justify-content:center; gap:5px;
+  cursor:pointer; transition:background .15s ease, opacity .12s ease, transform .1s ease, border-color .15s ease, color .15s ease;
 }
-.safe-btn svg{ width:14px; height:14px; flex-shrink:0; }
-.safe-btn:active:not(:disabled){ opacity:0.7; transform:scale(0.98); }
-.safe-btn:disabled{ opacity:0.28; cursor:not-allowed; }
+.safe-btn svg{ width:12px; height:12px; flex-shrink:0; opacity:0.75; }
+.safe-btn:active:not(:disabled){ opacity:0.6; transform:scale(0.98); }
+.safe-btn:disabled{ opacity:0.22; cursor:not-allowed; }
 .safe-btn.is-active{
-  background:rgba(50,215,75,0.2); border-color:var(--green);
+  background:rgba(50,215,75,0.1); border:1px solid rgba(50,215,75,0.35);
+  color:var(--green); font-weight:600;
 }
 
 .stamp{
