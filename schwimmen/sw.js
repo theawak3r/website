@@ -1,8 +1,16 @@
-const CACHE_NAME = 'schwimmen-leben-v4';
+const CACHE_NAME = 'schwimmen-leben-v5';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
+  './css/styles.css',
+  './js/state.js',
+  './js/screens.js',
+  './js/sheets.js',
+  './js/lobby.js',
+  './js/game.js',
+  './js/overview.js',
+  './js/main.js',
   './icon-192.png',
   './icon-512.png',
   './icon-maskable-512.png',
@@ -28,9 +36,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
-  // Nur eigene (same-origin) Dateien cachen. Firestore-Sync und Google Fonts
-  // sollen immer direkt ans Netzwerk gehen (nicht abfangen/cachen) -
-  // sonst kann das Syncen mit der Cloud kaputtgehen.
+  // Nur eigene (same-origin) Dateien cachen. Google Fonts sollen immer
+  // direkt ans Netzwerk gehen (nicht abfangen/cachen).
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
 
