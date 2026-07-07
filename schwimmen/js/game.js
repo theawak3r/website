@@ -69,13 +69,14 @@ function createTile(rp, displayName){
   top.appendChild(nameEl);
   top.appendChild(undoBtn);
 
-  const cardsFan = document.createElement('div');
-  cardsFan.className = 'cards-fan';
+  const cardsFanEl = document.createElement('div');
+  cardsFanEl.className = 'cards-fan';
   const cardEls = [];
-  for(let i=0; i<rp.maxLives; i++){
-    const card = createCard(i, rp.maxLives);
+  // Zu Rundenbeginn sind alle Leben noch da -> genau rp.lives Karten anlegen
+  for(let i=0; i<rp.lives; i++){
+    const card = createCard(i, rp.lives);
     cardEls.push(card);
-    cardsFan.appendChild(card);
+    cardsFanEl.appendChild(card);
   }
 
   const minusBtn = document.createElement('button');
@@ -89,21 +90,51 @@ function createTile(rp, displayName){
   stampEl.textContent = 'RAUS';
 
   tile.appendChild(top);
-  tile.appendChild(cardsFan);
+  tile.appendChild(cardsFanEl);
   tile.appendChild(minusBtn);
   tile.appendChild(stampEl);
 
-  tileRefs.set(rp.id, { tileEl: tile, cardEls, minusBtn, undoBtn, stampEl });
+  tileRefs.set(rp.id, { tileEl: tile, cardsFanEl, cardEls, minusBtn, undoBtn, stampEl });
   return tile;
 }
 
-function updateTileVisual(rp){
+// Fächer-Winkel/Höhe aller aktuell vorhandenen Karten neu verteilen
+// (nötig, weil sich die Gesamtzahl beim Entfernen/Hinzufügen ändert)
+function refanCards(refs){
+  const total = refs.cardEls.length;
+  refs.cardEls.forEach((el, i)=> applyFanTransform(el, i, total));
+}
+
+// Letzte Karte animiert aus dem Fächer entfernen (Leben verloren)
+function removeLastCard(refs){
+  if(!refs) return;
+  const el = refs.cardEls.pop();
+  if(!el) return;
+  refanCards(refs);
+  el.classList.add('leaving');
+  const cleanup = ()=>{ el.remove(); };
+  el.addEventListener('transitionend', cleanup, { once:true });
+  setTimeout(cleanup, 500); // Sicherheitsnetz, falls transitionend nicht feuert
+}
+
+// Neue Karte animiert einfügen (Leben zurückgegeben / Undo)
+function addNewCard(refs){
+  if(!refs) return;
+  const index = refs.cardEls.length;
+  const card = createCard(index, index + 1);
+  card.classList.add('entering');
+  refs.cardsFanEl.appendChild(card);
+  refs.cardEls.push(card);
+  refanCards(refs);
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=> card.classList.remove('entering'));
+  });
+}
+
+function updateTileControls(rp){
   const refs = tileRefs.get(rp.id);
   if(!refs) return;
   refs.tileEl.classList.toggle('out', rp.out);
-  refs.cardEls.forEach((cardEl, i)=>{
-    cardEl.classList.toggle('lost', i >= rp.lives);
-  });
   refs.minusBtn.disabled = rp.out || state.round.finished;
   refs.undoBtn.disabled = rp.lives >= rp.maxLives || state.round.finished;
 }
@@ -112,16 +143,15 @@ export function renderTiles(){
   tilesEl.innerHTML = '';
   tileRefs.clear();
 
-  const aliveCount = state.round.players.filter(p=>!p.out).length;
   const roundMode = state.round.mode === 'firstOut' ? 'firstOut' : 'last';
-  setTopbarSubtitle(aliveCount + ' von ' + state.round.players.length + ' im Spiel · ' + MODE_LABELS[roundMode].tag);
+  setTopbarSubtitle(computeAliveText(roundMode));
 
   state.round.players.forEach(rp=>{
     const rosterPlayer = state.roster.find(r=>r.id === rp.id);
     const displayName = rosterPlayer ? rosterPlayer.name : '?';
     const tile = createTile(rp, displayName);
     tilesEl.appendChild(tile);
-    updateTileVisual(rp);
+    updateTileControls(rp);
   });
 }
 
@@ -132,7 +162,8 @@ function loseLife(id){
   let justEliminated = false;
   if(rp.lives === 0){ rp.out = true; justEliminated = true; }
   saveState();
-  updateTileVisual(rp);
+  removeLastCard(tileRefs.get(id));
+  updateTileControls(rp);
   refreshAliveCount();
   if(justEliminated) checkRoundEnd(rp.id);
 }
@@ -143,14 +174,19 @@ function undoLife(id){
   rp.lives = Math.min(rp.maxLives, rp.lives + 1);
   if(rp.lives > 0) rp.out = false;
   saveState();
-  updateTileVisual(rp);
+  addNewCard(tileRefs.get(id));
+  updateTileControls(rp);
   refreshAliveCount();
 }
 
-function refreshAliveCount(){
+function computeAliveText(roundMode){
   const aliveCount = state.round.players.filter(p=>!p.out).length;
+  return aliveCount + ' von ' + state.round.players.length + ' im Spiel · ' + MODE_LABELS[roundMode].tag;
+}
+
+function refreshAliveCount(){
   const roundMode = state.round.mode === 'firstOut' ? 'firstOut' : 'last';
-  setTopbarSubtitle(aliveCount + ' von ' + state.round.players.length + ' im Spiel · ' + MODE_LABELS[roundMode].tag);
+  setTopbarSubtitle(computeAliveText(roundMode));
 }
 
 function checkRoundEnd(justOutId){
@@ -167,7 +203,7 @@ function checkRoundEnd(justOutId){
       else { rosterPlayer.wins = (rosterPlayer.wins || 0) + 1; }
     });
     saveState();
-    state.round.players.forEach(updateTileVisual);
+    state.round.players.forEach(updateTileControls);
     showWinnerOverlay();
     return;
   }
@@ -183,7 +219,7 @@ function checkRoundEnd(justOutId){
       else { rosterPlayer.losses = (rosterPlayer.losses || 0) + 1; }
     });
     saveState();
-    state.round.players.forEach(updateTileVisual);
+    state.round.players.forEach(updateTileControls);
     showWinnerOverlay();
   }
 }

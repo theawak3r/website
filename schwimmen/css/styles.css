@@ -293,14 +293,18 @@ button{ touch-action:manipulation; user-select:none; -webkit-user-select:none; }
 .life-card .pip.bottom{ bottom:3px; right:3px; transform:rotate(180deg); }
 .life-card.suit-red .pip{ color:var(--card-red); }
 .life-card.suit-black .pip{ color:var(--ink); }
-.life-card.lost{
-  background:repeating-linear-gradient(135deg, #2b2118, #2b2118 4px, #241b13 4px, #241b13 8px);
-  border-color:rgba(255,255,255,0.08);
-  box-shadow:0 1px 3px rgba(0,0,0,0.4);
-  opacity:0.55;
-  transform:rotate(var(--fan-rotate)) translateY(calc(var(--fan-lift) + 6px)) rotateY(180deg) scale(0.94);
+
+/* Karte fliegt beim Verlieren komplett weg, statt nur abgedunkelt zu werden */
+.life-card.leaving{
+  transform:rotate(calc(var(--fan-rotate) + 12deg)) translateY(calc(var(--fan-lift) + 30px)) scale(0.7) !important;
+  opacity:0;
+  pointer-events:none;
 }
-.life-card.lost .pip{ opacity:0; }
+/* Karte poppt beim Zurückgeben (Undo) sichtbar rein */
+.life-card.entering{
+  transform:scale(0.5) translateY(24px) !important;
+  opacity:0;
+}
 
 .minus-btn{
   width:100%; padding:10px; border:none; border-radius:10px;
