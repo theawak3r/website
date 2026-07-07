@@ -2,11 +2,11 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
 <title>Schwimmen — Lebenszähler</title>
 
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0B3D2E">
+<meta name="theme-color" content="#07231A">
 <link rel="icon" href="icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -15,387 +15,378 @@
 <meta name="mobile-web-app-capable" content="yes">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --felt-dark:#0B3D2E;
-    --felt-mid:#12523C;
-    --felt-line: rgba(243,236,221,0.14);
+    --bg:#07231A;
+    --surface: rgba(255,255,255,0.055);
+    --surface-2: rgba(255,255,255,0.09);
+    --surface-3: rgba(255,255,255,0.13);
+    --hairline: rgba(255,255,255,0.13);
     --cream:#F3ECDD;
-    --cream-dim:#D9D0BC;
-    --ink:#1E2A22;
+    --cream-dim: rgba(243,236,221,0.56);
+    --cream-faint: rgba(243,236,221,0.34);
+    --ink:#12261D;
     --brass:#C9A227;
-    --brass-bright:#E4C55A;
-    --red-out:#A63A2E;
-    --green-win:#3E8A67;
-    --shadow: 0 12px 30px rgba(0,0,0,0.35);
+    --brass-bright:#E7C761;
+    --red:#FF453A;
+    --green:#32D74B;
+    --nav-h: 52px;
   }
-  *{ box-sizing:border-box; }
-  html,body{ height:100%; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html{ height:100%; }
   body{
     margin:0;
+    min-height:100%;
     background:
-      radial-gradient(ellipse at top, rgba(255,255,255,0.05), transparent 60%),
-      var(--felt-dark);
-    background-attachment:fixed;
+      radial-gradient(ellipse 900px 500px at 50% -10%, rgba(255,255,255,0.05), transparent 60%),
+      var(--bg);
     color:var(--cream);
-    font-family:'Inter', sans-serif;
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    padding:32px 16px 64px;
+    font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overscroll-behavior-y:none;
   }
-  .wrap{ width:100%; max-width:760px; }
+  button, input{ font-family:inherit; }
+  button{ touch-action:manipulation; user-select:none; -webkit-user-select:none; }
+  ::selection{ background:rgba(201,162,39,0.35); }
 
-  h1.title{
+  /* ---------- top bar ---------- */
+  .topbar{
+    position:fixed; top:0; left:0; right:0; z-index:20;
+    padding-top:env(safe-area-inset-top);
+    background:rgba(7,35,26,0.72);
+    -webkit-backdrop-filter:blur(20px) saturate(160%);
+    backdrop-filter:blur(20px) saturate(160%);
+    border-bottom:1px solid var(--hairline);
+  }
+  .topbar-inner{
+    height:var(--nav-h);
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 16px;
+    max-width:760px; margin:0 auto;
+  }
+  .topbar-titles{ display:flex; flex-direction:column; justify-content:center; min-width:0; }
+  .topbar-title{
     font-family:'Fraunces', serif;
     font-weight:700;
-    font-size: clamp(28px, 6vw, 44px);
-    text-align:center;
-    letter-spacing:0.5px;
-    margin:0 0 4px;
-    color:var(--cream);
+    font-size:19px;
+    margin:0;
+    letter-spacing:0.1px;
+    line-height:1.1;
   }
-  p.subtitle{
-    text-align:center;
+  .topbar-subtitle{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
     color:var(--cream-dim);
-    font-size:14px;
-    letter-spacing:1.5px;
-    text-transform:uppercase;
-    margin:0 0 36px;
+    margin:1px 0 0;
+    letter-spacing:0.2px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
-  p.subtitle .divider{ color:var(--brass); margin:0 8px; }
+  .topbar-actions{ display:flex; align-items:center; gap:4px; flex-shrink:0; }
 
-  .panel{
-    background:var(--felt-mid);
-    border:1px solid var(--felt-line);
-    border-radius:18px;
-    padding:28px;
-    box-shadow:var(--shadow);
-  }
-  .field-label{
-    font-size:12px;
-    text-transform:uppercase;
-    letter-spacing:1.2px;
-    color:var(--cream-dim);
-    display:block;
-    margin-bottom:8px;
-  }
-  .lives-stepper{
-    display:flex;
-    align-items:center;
-    gap:14px;
-    margin-bottom:28px;
-  }
-  .stepper-btn{
-    width:40px; height:40px;
-    border-radius:10px;
-    border:1px solid var(--felt-line);
-    background:rgba(243,236,221,0.06);
+  .icon-btn{
+    width:34px; height:34px;
+    border-radius:50%;
+    border:none;
+    background:var(--surface-2);
     color:var(--cream);
-    font-size:20px;
-    cursor:pointer;
     display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
     transition:background .15s ease, transform .1s ease;
   }
-  .stepper-btn:hover{ background:rgba(243,236,221,0.14); }
-  .stepper-btn:active{ transform:scale(0.94); }
-  .lives-value{
-    font-family:'IBM Plex Mono', monospace;
-    font-size:26px;
-    font-weight:600;
-    min-width:34px;
-    text-align:center;
-    color:var(--brass-bright);
+  .icon-btn:active{ transform:scale(0.9); background:var(--surface-3); }
+  .icon-btn svg{ width:18px; height:18px; }
+
+  .content{
+    max-width:760px; margin:0 auto;
+    padding: calc(var(--nav-h) + env(safe-area-inset-top) + 20px) 16px calc(48px + env(safe-area-inset-bottom));
   }
 
-  .segmented{
-    display:flex;
-    gap:8px;
-    margin-bottom:10px;
-    flex-wrap:wrap;
-  }
-  .segmented button{
-    flex:1 1 160px;
-    padding:12px 14px;
-    border-radius:10px;
-    border:1px solid var(--felt-line);
-    background:rgba(243,236,221,0.05);
-    color:var(--cream-dim);
-    font-size:13px;
-    font-weight:600;
-    text-align:left;
-    cursor:pointer;
-    transition:background .15s ease, border-color .15s ease, color .15s ease;
-  }
-  .segmented button strong{
-    display:block;
-    font-size:14px;
-    font-weight:700;
-    color:var(--cream);
-    margin-bottom:2px;
-  }
-  .segmented button:hover{ background:rgba(243,236,221,0.1); }
-  .segmented button.active{
-    border-color:var(--brass);
-    background:rgba(201,162,39,0.14);
-    color:var(--cream);
-  }
-  .segmented button.active strong{ color:var(--brass-bright); }
-  .mode-hint{ font-size:13px; color:var(--cream-dim); margin:0 0 24px; }
-
-  .mode-tag{
-    font-family:'IBM Plex Mono', monospace;
-    font-size:11px;
-    color:var(--cream-dim);
-    letter-spacing:0.5px;
-    display:block;
-    margin-top:2px;
+  .screen{ animation:screenIn .32s cubic-bezier(.36,.66,.04,1); }
+  @keyframes screenIn{
+    from{ opacity:0; transform:translateY(8px); }
+    to{ opacity:1; transform:translateY(0); }
   }
 
-  .winner-sub{
-    font-size:14px;
-    color:var(--cream-dim);
-    margin:-14px 0 24px;
+  /* ---------- section / grouped list look ---------- */
+  .section{ margin-bottom:28px; }
+  .section-label{
+    font-size:12px; font-weight:600;
+    text-transform:uppercase; letter-spacing:0.6px;
+    color:var(--cream-faint);
+    margin:0 0 8px 4px;
   }
-  .winner-card.loss-style{ border-color:var(--red-out); }
-  .winner-card.loss-style .winner-eyebrow{ color:#E08A7D; }
-  .winner-card.loss-style .winner-name{ color:#E08A7D; }
+  .section-footnote{
+    font-size:12.5px; color:var(--cream-faint);
+    margin:8px 4px 0; line-height:1.4;
+  }
 
-  .player-row{ display:flex; gap:10px; margin-bottom:12px; }
-  input[type="text"]{
-    flex:1;
-    background:rgba(243,236,221,0.07);
-    border:1px solid var(--felt-line);
-    border-radius:10px;
-    padding:12px 14px;
-    color:var(--cream);
-    font-size:15px;
-    font-family:'Inter', sans-serif;
+  .card{
+    background:var(--surface);
+    border:1px solid var(--hairline);
+    border-radius:16px;
   }
-  input[type="text"]::placeholder{ color:rgba(243,236,221,0.4); }
-  input[type="text"]:focus, .stepper-btn:focus-visible, button:focus-visible{
-    outline:2px solid var(--brass-bright);
-    outline-offset:2px;
-  }
-  .add-btn{
-    width:48px;
-    border-radius:10px;
-    border:none;
-    background:var(--brass);
-    color:var(--ink);
-    font-size:20px;
-    font-weight:700;
-    cursor:pointer;
-    transition:background .15s ease;
-  }
-  .add-btn:hover{ background:var(--brass-bright); }
 
-  .player-list{ list-style:none; padding:0; margin:4px 0 24px; display:flex; flex-direction:column; gap:8px; }
-  .player-list li{
+  /* ---------- stepper ---------- */
+  .stepper-pill{
     display:flex; align-items:center; justify-content:space-between;
-    background:rgba(243,236,221,0.05);
-    border:1px solid var(--felt-line);
-    border-radius:10px;
-    padding:10px 14px;
-    font-size:15px;
+    background:var(--surface); border:1px solid var(--hairline);
+    border-radius:14px; padding:6px 6px;
   }
-  .player-list .played-tag{
-    font-family:'IBM Plex Mono', monospace;
-    font-size:11px;
-    color:var(--cream-dim);
-    margin-left:10px;
-  }
-  .player-list .remove{
-    background:none; border:none; color:var(--cream-dim);
-    font-size:16px; cursor:pointer; line-height:1;
-  }
-  .player-list .remove:hover{ color:var(--red-out); }
-
-  .hint{ font-size:13px; color:var(--cream-dim); margin:-8px 0 20px; }
-  .empty-hint{ font-size:14px; color:var(--cream-dim); margin:8px 0 24px; }
-
-  .primary-btn{
-    width:100%;
-    padding:16px;
-    border:none;
-    border-radius:12px;
-    background:var(--brass);
-    color:var(--ink);
-    font-size:16px;
-    font-weight:700;
-    letter-spacing:0.4px;
-    cursor:pointer;
+  .stepper-label{ font-size:15px; font-weight:500; padding-left:10px; }
+  .stepper-controls{ display:flex; align-items:center; gap:2px; }
+  .stepper-btn{
+    width:36px; height:36px; border-radius:50%;
+    border:none; background:var(--surface-2); color:var(--cream);
+    font-size:19px; cursor:pointer; line-height:1;
+    display:flex; align-items:center; justify-content:center;
     transition:background .15s ease, transform .08s ease;
   }
-  .primary-btn:hover:not(:disabled){ background:var(--brass-bright); }
-  .primary-btn:active:not(:disabled){ transform:scale(0.99); }
-  .primary-btn:disabled{ opacity:0.4; cursor:not-allowed; }
+  .stepper-btn:active{ transform:scale(0.88); background:var(--surface-3); }
+  .stepper-value{
+    font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:17px;
+    min-width:30px; text-align:center; color:var(--brass-bright);
+  }
 
-  .btn-row{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:14px; }
-
-  .ghost-btn{
-    padding:10px 16px;
-    border-radius:10px;
-    border:1px solid var(--felt-line);
-    background:transparent;
+  /* ---------- segmented control ---------- */
+  .segmented{
+    position:relative;
+    display:flex;
+    background:var(--surface);
+    border:1px solid var(--hairline);
+    border-radius:12px;
+    padding:3px;
+  }
+  .segmented-thumb{
+    position:absolute; top:3px; bottom:3px; left:3px;
+    width:calc(50% - 3px);
+    background:var(--surface-3);
+    border:1px solid rgba(255,255,255,0.16);
+    border-radius:9px;
+    transition:transform .32s cubic-bezier(.36,.66,.04,1);
+  }
+  .segmented.mode-firstOut .segmented-thumb{ transform:translateX(100%); }
+  .segmented-btn{
+    position:relative; z-index:1; flex:1;
+    background:none; border:none;
+    padding:10px 6px;
+    font-size:12.5px; font-weight:600;
     color:var(--cream-dim);
-    font-size:13px;
     cursor:pointer;
-    transition:background .15s ease, color .15s ease;
+    transition:color .2s ease;
   }
-  .ghost-btn:hover{ background:rgba(243,236,221,0.08); color:var(--cream); }
-  .ghost-btn.danger:hover{ color:var(--red-out); }
+  .segmented-btn.active{ color:var(--cream); }
+  .mode-hint{ font-size:12.5px; color:var(--cream-faint); margin:8px 4px 0; line-height:1.4; }
 
-  /* ---------- screens ---------- */
-  #lobby-screen, #game-screen, #overview-screen{ display:none; }
+  /* ---------- add player row ---------- */
+  .add-row{
+    display:flex; align-items:center; gap:10px;
+    background:var(--surface); border:1px solid var(--hairline);
+    border-radius:14px; padding:6px 8px 6px 14px;
+    margin-bottom:10px;
+  }
+  .add-row input[type="text"]{
+    flex:1; border:none; background:none; outline:none;
+    color:var(--cream); font-size:16px; padding:8px 0;
+  }
+  .add-row input[type="text"]::placeholder{ color:var(--cream-faint); }
+  .plus-circle{
+    width:30px; height:30px; border-radius:50%; flex-shrink:0;
+    background:var(--green); border:none; color:#04380F;
+    font-size:19px; font-weight:700; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .1s ease, opacity .15s ease;
+  }
+  .plus-circle:active{ transform:scale(0.88); }
+  .plus-circle:disabled{ opacity:0.3; }
 
-  .game-header{
+  /* ---------- ios-style grouped list ---------- */
+  .ios-list{
+    list-style:none; margin:0; padding:0;
+    background:var(--surface); border:1px solid var(--hairline);
+    border-radius:14px; overflow:hidden;
+  }
+  .ios-row{
     display:flex; align-items:center; justify-content:space-between;
-    margin-bottom:22px; gap:10px; flex-wrap:wrap;
+    padding:12px 14px; min-height:48px;
+    border-bottom:1px solid var(--hairline);
   }
-  .round-tag{
-    font-family:'IBM Plex Mono', monospace;
-    font-size:13px;
-    color:var(--brass-bright);
-    letter-spacing:1px;
+  .ios-row:last-child{ border-bottom:none; }
+  .ios-row-text{ font-size:15.5px; }
+  .played-tag{
+    font-family:'IBM Plex Mono', monospace; font-size:11px;
+    color:var(--cream-faint); margin-left:8px;
   }
-  .header-btns{ display:flex; gap:8px; }
+  .minus-circle{
+    width:24px; height:24px; border-radius:50%; flex-shrink:0;
+    background:var(--red); border:none; color:#fff;
+    font-size:16px; font-weight:700; line-height:1; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .1s ease;
+  }
+  .minus-circle:active{ transform:scale(0.85); }
 
+  .empty-hint{ font-size:14px; color:var(--cream-faint); margin:14px 6px 0; text-align:center; }
+
+  /* ---------- buttons ---------- */
+  .primary-btn{
+    width:100%; padding:15px; border:none; border-radius:14px;
+    background:var(--brass); color:var(--ink);
+    font-size:16px; font-weight:700; letter-spacing:0.2px;
+    cursor:pointer;
+    transition:opacity .12s ease, transform .1s ease;
+  }
+  .primary-btn:active:not(:disabled){ opacity:0.72; transform:scale(0.99); }
+  .primary-btn:disabled{ opacity:0.35; cursor:not-allowed; }
+
+  .text-btn{
+    width:100%; padding:13px; border:none; border-radius:14px;
+    background:var(--surface); border:1px solid var(--hairline);
+    color:var(--cream); font-size:15px; font-weight:500;
+    cursor:pointer; transition:background .15s ease, opacity .12s ease;
+  }
+  .text-btn:active{ opacity:0.6; }
+  .text-btn.destructive{ color:var(--red); }
+
+  .btn-stack{ display:flex; flex-direction:column; gap:10px; margin-top:10px; }
+
+  /* ---------- game screen ---------- */
   .tiles{
     display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(180px,1fr));
-    gap:16px;
+    grid-template-columns:repeat(auto-fill, minmax(168px,1fr));
+    gap:12px;
   }
   .tile{
     position:relative;
-    background:var(--felt-mid);
-    border:1px solid var(--felt-line);
+    background:var(--surface);
+    border:1px solid var(--hairline);
     border-radius:16px;
-    padding:18px 16px 16px;
-    box-shadow:var(--shadow);
+    padding:16px 14px 14px;
     overflow:hidden;
     transition:opacity .3s ease, filter .3s ease;
   }
-  .tile.out{ opacity:0.55; filter:grayscale(0.6); }
+  .tile.out{ opacity:0.5; filter:grayscale(0.7); }
 
-  .tile-top{ display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:14px; }
+  .tile-top{ display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:12px; gap:6px; }
   .tile-name{
-    font-family:'Fraunces', serif;
-    font-weight:600;
-    font-size:19px;
-    word-break:break-word;
-    padding-right:8px;
+    font-size:16.5px; font-weight:600;
+    word-break:break-word; line-height:1.25;
   }
   .undo-btn{
-    background:none; border:none; color:var(--cream-dim);
-    font-size:15px; cursor:pointer; line-height:1; padding:2px 4px;
+    width:28px; height:28px; border-radius:50%; flex-shrink:0;
+    background:var(--surface-2); border:none; color:var(--cream-dim);
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+    transition:background .15s ease, transform .1s ease;
   }
-  .undo-btn:hover{ color:var(--brass-bright); }
-  .undo-btn:disabled{ opacity:0.25; cursor:not-allowed; }
+  .undo-btn svg{ width:14px; height:14px; }
+  .undo-btn:active:not(:disabled){ transform:scale(0.85); }
+  .undo-btn:disabled{ opacity:0.25; }
 
-  .cards-row{
-    display:flex; gap:6px; flex-wrap:wrap; min-height:38px; margin-bottom:16px;
-  }
+  .cards-row{ display:flex; gap:5px; flex-wrap:wrap; min-height:34px; margin-bottom:14px; }
   .life-card{
-    width:22px; height:32px;
-    border-radius:4px;
-    background:linear-gradient(135deg, var(--cream), var(--cream-dim));
-    border:1px solid rgba(0,0,0,0.15);
-    box-shadow:0 2px 4px rgba(0,0,0,0.25);
+    width:19px; height:28px; border-radius:4px;
+    background:linear-gradient(135deg, var(--cream), #D9D0BC);
+    border:1px solid rgba(0,0,0,0.2);
     transition:transform .35s ease, background .35s ease, opacity .35s ease;
   }
   .life-card.lost{
     background:linear-gradient(135deg, #3a2c22, #241a14);
-    transform:rotateY(180deg) translateY(4px);
-    opacity:0.5;
+    transform:rotateY(180deg) translateY(3px);
+    opacity:0.45;
   }
 
   .minus-btn{
-    width:100%;
-    padding:11px;
-    border:none;
-    border-radius:9px;
-    background:rgba(166,58,46,0.85);
-    color:var(--cream);
-    font-size:14px;
-    font-weight:600;
-    cursor:pointer;
-    transition:background .15s ease, transform .08s ease;
+    width:100%; padding:10px; border:none; border-radius:10px;
+    background:rgba(255,69,58,0.9); color:#fff;
+    font-size:13.5px; font-weight:600; cursor:pointer;
+    transition:opacity .12s ease, transform .1s ease;
   }
-  .minus-btn:hover:not(:disabled){ background:var(--red-out); }
-  .minus-btn:active:not(:disabled){ transform:scale(0.98); }
-  .minus-btn:disabled{ opacity:0.3; cursor:not-allowed; }
+  .minus-btn:active:not(:disabled){ opacity:0.7; transform:scale(0.98); }
+  .minus-btn:disabled{ opacity:0.28; cursor:not-allowed; }
 
   .stamp{
-    position:absolute;
-    top:38%; left:50%;
-    transform:translate(-50%,-50%) rotate(-18deg);
-    font-family:'Fraunces', serif;
-    font-weight:700;
-    font-size:22px;
-    color:var(--red-out);
-    border:3px solid var(--red-out);
-    border-radius:8px;
-    padding:2px 10px;
-    letter-spacing:2px;
-    opacity:0;
-    pointer-events:none;
-    transition:opacity .3s ease;
+    position:absolute; top:40%; left:50%;
+    transform:translate(-50%,-50%) rotate(-16deg);
+    font-family:'Fraunces', serif; font-weight:700; font-size:19px;
+    color:var(--red); border:2.5px solid var(--red); border-radius:8px;
+    padding:2px 9px; letter-spacing:1.5px;
+    opacity:0; pointer-events:none; transition:opacity .3s ease;
   }
-  .tile.out .stamp{ opacity:0.85; }
+  .tile.out .stamp{ opacity:0.9; }
 
-  /* ---------- overview / stats ---------- */
-  .stats-table{ width:100%; border-collapse:collapse; margin:8px 0 8px; }
+  /* ---------- bottom sheets ---------- */
+  .sheet-backdrop{
+    position:fixed; inset:0; z-index:40;
+    background:rgba(0,0,0,0.5);
+    opacity:0; pointer-events:none;
+    transition:opacity .28s ease;
+  }
+  .sheet-backdrop.open{ opacity:1; pointer-events:auto; }
+
+  .sheet{
+    position:fixed; left:0; right:0; bottom:0; z-index:41;
+    max-width:760px; margin:0 auto;
+    background:#0E2E22;
+    border:1px solid var(--hairline);
+    border-bottom:none;
+    border-radius:22px 22px 0 0;
+    padding:10px 20px calc(24px + env(safe-area-inset-bottom));
+    max-height:82vh; overflow-y:auto;
+    transform:translateY(105%);
+    transition:transform .36s cubic-bezier(.32,.72,0,1);
+    box-shadow:0 -10px 40px rgba(0,0,0,0.4);
+  }
+  .sheet.open{ transform:translateY(0); }
+  .sheet-grabber{
+    width:36px; height:5px; border-radius:3px;
+    background:var(--surface-3); margin:2px auto 14px;
+  }
+  .sheet-header{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:16px;
+  }
+  .sheet-title{ font-family:'Fraunces', serif; font-weight:700; font-size:20px; margin:0; }
+  .sheet-close{
+    width:30px; height:30px; border-radius:50%; border:none;
+    background:var(--surface-2); color:var(--cream-dim); font-size:15px;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .sheet-close:active{ transform:scale(0.9); }
+
+  /* stats table */
+  .stats-table{ width:100%; border-collapse:collapse; margin:4px 0 4px; }
   .stats-table th, .stats-table td{
-    text-align:left; padding:12px 10px;
-    border-bottom:1px solid var(--felt-line);
+    text-align:left; padding:11px 8px;
+    border-bottom:1px solid var(--hairline);
     font-size:14px;
   }
   .stats-table th{
-    font-size:11px; text-transform:uppercase; letter-spacing:1px;
-    color:var(--cream-dim); font-weight:600;
+    font-size:10.5px; text-transform:uppercase; letter-spacing:0.6px;
+    color:var(--cream-faint); font-weight:600;
   }
   .stats-table td.num, .stats-table th.num{ text-align:center; font-family:'IBM Plex Mono', monospace; }
   .stats-table tr:last-child td{ border-bottom:none; }
   .rank-badge{
     display:inline-flex; align-items:center; justify-content:center;
-    width:22px; height:22px; border-radius:50%;
+    width:20px; height:20px; border-radius:50%;
     background:rgba(201,162,39,0.18); color:var(--brass-bright);
-    font-family:'IBM Plex Mono', monospace; font-size:11px; margin-right:8px;
+    font-family:'IBM Plex Mono', monospace; font-size:10.5px; margin-right:8px;
   }
-  .win-count{ color:var(--green-win); font-weight:600; }
-  .loss-count{ color:var(--red-out); font-weight:600; }
+  .win-count{ color:var(--green); font-weight:600; }
+  .loss-count{ color:var(--red); font-weight:600; }
 
-  /* ---------- winner overlay ---------- */
-  #winner-overlay{
-    display:none;
-    position:fixed; inset:0;
-    background:rgba(6,20,14,0.88);
-    align-items:center; justify-content:center;
-    z-index:50;
-    padding:24px;
-  }
-  .winner-card{
-    background:var(--felt-mid);
-    border:1px solid var(--brass);
-    border-radius:20px;
-    padding:44px 36px;
-    text-align:center;
-    max-width:420px;
-    box-shadow:0 20px 50px rgba(0,0,0,0.5);
-  }
+  /* winner sheet */
+  .winner-body{ text-align:center; padding:14px 4px 4px; }
   .winner-eyebrow{
-    font-size:13px; letter-spacing:2px; text-transform:uppercase;
-    color:var(--brass-bright); margin-bottom:10px;
+    font-size:12px; letter-spacing:1.6px; text-transform:uppercase;
+    color:var(--brass-bright); margin-bottom:8px; font-weight:600;
   }
   .winner-name{
-    font-family:'Fraunces', serif;
-    font-weight:700;
-    font-size:36px;
-    margin:0 0 24px;
+    font-family:'Fraunces', serif; font-weight:700; font-size:32px; margin:0 0 8px;
   }
+  .winner-sub{ font-size:14px; color:var(--cream-dim); margin:0 0 22px; min-height:1px; }
+  .sheet.loss-style .winner-eyebrow{ color:#FF8B80; }
+  .sheet.loss-style .winner-name{ color:#FF8B80; }
 
   @media (max-width:420px){
     .tiles{ grid-template-columns:1fr 1fr; }
@@ -404,102 +395,110 @@
 </head>
 <body>
 
-<div class="wrap">
-  <h1 class="title">Schwimmen</h1>
-  <p class="subtitle">Lebenszähler <span class="divider">·</span> für den Kartentisch</p>
-
-  <!-- LOBBY: Spieler definieren / verwalten, Runde starten -->
-  <div id="lobby-screen" class="panel">
-    <span class="field-label">Startleben pro Spieler</span>
-    <div class="lives-stepper">
-      <button class="stepper-btn" id="lives-minus" type="button" aria-label="Weniger Startleben">−</button>
-      <span class="lives-value" id="lives-value">3</span>
-      <button class="stepper-btn" id="lives-plus" type="button" aria-label="Mehr Startleben">+</button>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-titles">
+      <h1 class="topbar-title">Schwimmen</h1>
+      <p class="topbar-subtitle" id="topbar-subtitle"></p>
     </div>
-
-    <span class="field-label">Rundenende</span>
-    <div class="segmented" id="mode-toggle">
-      <button type="button" id="mode-last-btn" data-mode="last">
-        <strong>Letzter übrig</strong>
-        Sieg für den letzten Spieler mit Leben, Niederlage für den Rest
+    <div class="topbar-actions">
+      <button class="icon-btn" id="nav-newround-btn" type="button" aria-label="Neue Runde" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.9-4"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.9 4"/><path d="M20 20v-4h-4"/></svg>
       </button>
-      <button type="button" id="mode-firstout-btn" data-mode="firstOut">
-        <strong>Erster ohne Leben</strong>
-        Niederlage für den Ersten bei 0 Leben, Sieg für alle übrigen
+      <button class="icon-btn" id="nav-overview-btn" type="button" aria-label="Übersicht">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="20" x2="5" y2="12"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="19" y1="20" x2="19" y2="15"/></svg>
       </button>
     </div>
-    <p class="mode-hint" id="mode-hint"></p>
+  </div>
+</header>
 
-    <span class="field-label">Spieler</span>
-    <div class="player-row">
-      <input type="text" id="player-input" placeholder="Name eingeben…" maxlength="20">
-      <button class="add-btn" id="add-player-btn" type="button" aria-label="Spieler hinzufügen">+</button>
+<main class="content">
+  <!-- LOBBY -->
+  <section id="lobby-screen" class="screen">
+
+    <div class="section">
+      <p class="section-label">Startleben pro Spieler</p>
+      <div class="stepper-pill">
+        <span class="stepper-label">Leben</span>
+        <div class="stepper-controls">
+          <button class="stepper-btn" id="lives-minus" type="button" aria-label="Weniger Startleben">−</button>
+          <span class="stepper-value" id="lives-value">3</span>
+          <button class="stepper-btn" id="lives-plus" type="button" aria-label="Mehr Startleben">+</button>
+        </div>
+      </div>
     </div>
-    <p class="hint" id="lobby-hint">Mit Enter bestätigen. Mindestens 2 Spieler nötig.</p>
 
-    <ul class="player-list" id="player-list"></ul>
+    <div class="section">
+      <p class="section-label">Rundenende</p>
+      <div class="segmented" id="mode-toggle">
+        <div class="segmented-thumb"></div>
+        <button type="button" class="segmented-btn" id="mode-last-btn" data-mode="last">Letzter übrig</button>
+        <button type="button" class="segmented-btn" id="mode-firstout-btn" data-mode="firstOut">Erster ohne Leben</button>
+      </div>
+      <p class="mode-hint" id="mode-hint"></p>
+    </div>
+
+    <div class="section">
+      <p class="section-label">Spieler</p>
+      <div class="add-row">
+        <button class="plus-circle" id="add-player-btn" type="button" aria-label="Spieler hinzufügen">+</button>
+        <input type="text" id="player-input" placeholder="Name eingeben…" maxlength="20">
+      </div>
+      <ul class="ios-list" id="player-list"></ul>
+      <p class="section-footnote" id="lobby-hint"></p>
+    </div>
 
     <button class="primary-btn" id="start-btn" disabled>Spiel starten</button>
 
-    <div class="btn-row" id="lobby-secondary-btns" style="display:none;">
-      <button class="ghost-btn" id="lobby-overview-btn" type="button">Übersicht</button>
-      <button class="ghost-btn danger" id="lobby-reset-all-btn" type="button">Alles zurücksetzen</button>
+    <div class="btn-stack" id="lobby-secondary-btns" style="display:none;">
+      <button class="text-btn destructive" id="lobby-reset-all-btn" type="button">Alles zurücksetzen</button>
     </div>
-  </div>
+  </section>
 
   <!-- GAME -->
-  <div id="game-screen">
-    <div class="game-header">
-      <div>
-        <span class="round-tag" id="alive-tag">— Spieler im Spiel</span>
-        <span class="mode-tag" id="game-mode-tag"></span>
-      </div>
-      <div class="header-btns">
-        <button class="ghost-btn" id="game-overview-btn" type="button">Übersicht</button>
-        <button class="ghost-btn" id="game-newround-btn" type="button">Neue Runde</button>
-      </div>
-    </div>
-
+  <section id="game-screen" class="screen" style="display:none;">
     <div class="tiles" id="tiles"></div>
+  </section>
+</main>
+
+<!-- OVERVIEW SHEET -->
+<div class="sheet-backdrop" id="overview-backdrop"></div>
+<div class="sheet" id="overview-sheet">
+  <div class="sheet-grabber"></div>
+  <div class="sheet-header">
+    <h2 class="sheet-title">Übersicht</h2>
+    <button class="sheet-close" id="overview-close-btn" type="button" aria-label="Schließen">✕</button>
   </div>
+  <table class="stats-table" id="stats-table">
+    <thead>
+      <tr>
+        <th>Spieler</th>
+        <th class="num">Siege</th>
+        <th class="num">Verlorene Runden</th>
+      </tr>
+    </thead>
+    <tbody id="stats-tbody"></tbody>
+  </table>
+  <p class="empty-hint" id="stats-empty-hint" style="display:none;">Noch keine Runde gespielt.</p>
 
-  <!-- OVERVIEW / STATS -->
-  <div id="overview-screen" class="panel">
-    <div class="game-header">
-      <span class="round-tag">Statistik</span>
-    </div>
-    <table class="stats-table" id="stats-table">
-      <thead>
-        <tr>
-          <th>Spieler</th>
-          <th class="num">Siege</th>
-          <th class="num">Verlorene Runden</th>
-        </tr>
-      </thead>
-      <tbody id="stats-tbody"></tbody>
-    </table>
-    <p class="empty-hint" id="stats-empty-hint" style="display:none;">Noch keine Runde gespielt.</p>
-
-    <div class="btn-row">
-      <button class="ghost-btn" id="overview-back-btn" type="button">Zurück</button>
-      <button class="ghost-btn" id="overview-reset-stats-btn" type="button">Statistik zurücksetzen</button>
-      <button class="ghost-btn danger" id="overview-reset-all-btn" type="button">Alles zurücksetzen</button>
-    </div>
+  <div class="btn-stack">
+    <button class="text-btn" id="overview-reset-stats-btn" type="button">Statistik zurücksetzen</button>
+    <button class="text-btn destructive" id="overview-reset-all-btn" type="button">Alles zurücksetzen</button>
   </div>
 </div>
 
-<!-- WINNER -->
-<div id="winner-overlay">
-  <div class="winner-card" id="winner-card">
+<!-- WINNER SHEET -->
+<div class="sheet-backdrop" id="winner-backdrop"></div>
+<div class="sheet" id="winner-sheet">
+  <div class="sheet-grabber"></div>
+  <div class="winner-body">
     <div class="winner-eyebrow" id="winner-eyebrow">Letzter am Tisch</div>
     <h2 class="winner-name" id="winner-name">—</h2>
     <p class="winner-sub" id="winner-sub"></p>
-    <div class="btn-row">
-      <button class="primary-btn" id="winner-newround-btn" style="width:auto; flex:1 1 auto;">Neue Runde</button>
-    </div>
-    <div class="btn-row">
-      <button class="ghost-btn" id="winner-overview-btn" type="button">Übersicht</button>
-    </div>
+  </div>
+  <div class="btn-stack">
+    <button class="primary-btn" id="winner-newround-btn" type="button">Neue Runde</button>
+    <button class="text-btn" id="winner-overview-btn" type="button">Übersicht</button>
   </div>
 </div>
 
@@ -507,28 +506,25 @@
 (function(){
   const STORAGE_KEY = 'schwimmen-state-v2';
 
-  // roster: [{id, name, wins, losses}]  — persists across rounds
-  // round: { active, finished, mode, specialId, players:[{id,lives,maxLives,out}] }
-  // specialId = winner (mode 'last') or loser (mode 'firstOut')
   let roster = [];
   let startLives = 3;
-  let mode = 'last'; // 'last' = letzter übrig gewinnt | 'firstOut' = erster ohne Leben verliert
+  let mode = 'last';
   let round = { active:false, finished:false, mode:'last', specialId:null, players:[] };
   let nextId = 1;
-  let overviewReturnTo = 'lobby'; // 'lobby' or 'game'
+  let currentScreen = 'lobby';
 
   const MODE_LABELS = {
-    last: { tag:'Modus: Letzter übrig gewinnt' },
-    firstOut: { tag:'Modus: Erster ohne Leben beendet die Runde' }
+    last: { tag:'Letzter übrig gewinnt' },
+    firstOut: { tag:'Erster ohne Leben beendet die Runde' }
   };
 
-  // ---------- persistence ----------
+  // ---------- persistence (local only) ----------
   function saveState(){
     try{
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ roster, startLives, mode, round, nextId }));
-    }catch(e){ /* storage unavailable, ignore */ }
+    }catch(e){}
   }
-  function loadState(){
+  function loadLocalState(){
     try{
       const raw = localStorage.getItem(STORAGE_KEY);
       if(!raw) return false;
@@ -541,7 +537,7 @@
         nextId = data.nextId || (roster.length + 1);
         return true;
       }
-    }catch(e){ /* ignore */ }
+    }catch(e){}
     return false;
   }
   function clearAll(){
@@ -555,8 +551,6 @@
   // ---------- elements ----------
   const lobbyScreen = document.getElementById('lobby-screen');
   const gameScreen = document.getElementById('game-screen');
-  const overviewScreen = document.getElementById('overview-screen');
-  const winnerOverlay = document.getElementById('winner-overlay');
 
   const livesValueEl = document.getElementById('lives-value');
   const playerInput = document.getElementById('player-input');
@@ -566,17 +560,40 @@
   const lobbySecondaryBtns = document.getElementById('lobby-secondary-btns');
 
   const tilesEl = document.getElementById('tiles');
-  const aliveTag = document.getElementById('alive-tag');
+  const topbarSubtitle = document.getElementById('topbar-subtitle');
+  const navNewRoundBtn = document.getElementById('nav-newround-btn');
+  const navOverviewBtn = document.getElementById('nav-overview-btn');
 
   const winnerNameEl = document.getElementById('winner-name');
   const statsTbody = document.getElementById('stats-tbody');
   const statsEmptyHint = document.getElementById('stats-empty-hint');
 
+  const overviewSheet = document.getElementById('overview-sheet');
+  const overviewBackdrop = document.getElementById('overview-backdrop');
+  const winnerSheet = document.getElementById('winner-sheet');
+  const winnerBackdrop = document.getElementById('winner-backdrop');
+
+  // ---------- sheet helpers ----------
+  function openSheet(sheet, backdrop){
+    backdrop.classList.add('open');
+    sheet.classList.add('open');
+  }
+  function closeSheet(sheet, backdrop){
+    backdrop.classList.remove('open');
+    sheet.classList.remove('open');
+  }
+  overviewBackdrop.addEventListener('click', ()=> closeSheet(overviewSheet, overviewBackdrop));
+  winnerBackdrop.addEventListener('click', ()=> closeSheet(winnerSheet, winnerBackdrop));
+
   // ---------- screen switching ----------
   function showScreen(name){
+    currentScreen = name;
     lobbyScreen.style.display = name === 'lobby' ? 'block' : 'none';
     gameScreen.style.display = name === 'game' ? 'block' : 'none';
-    overviewScreen.style.display = name === 'overview' ? 'block' : 'none';
+    navNewRoundBtn.style.display = name === 'game' ? 'flex' : 'none';
+    if(name === 'lobby'){
+      topbarSubtitle.textContent = roster.length > 0 ? roster.length + ' Spieler gespeichert' : 'Spieler & Regeln festlegen';
+    }
   }
 
   // ---------- lobby ----------
@@ -591,11 +608,13 @@
     saveState();
   });
 
+  const modeToggle = document.getElementById('mode-toggle');
   const modeLastBtn = document.getElementById('mode-last-btn');
   const modeFirstOutBtn = document.getElementById('mode-firstout-btn');
   const modeHint = document.getElementById('mode-hint');
 
   function syncModeUI(){
+    modeToggle.classList.toggle('mode-firstOut', mode === 'firstOut');
     modeLastBtn.classList.toggle('active', mode === 'last');
     modeFirstOutBtn.classList.toggle('active', mode === 'firstOut');
     modeHint.textContent = mode === 'last'
@@ -616,7 +635,9 @@
     playerListEl.innerHTML = '';
     roster.forEach(p=>{
       const li = document.createElement('li');
+      li.className = 'ios-row';
       const span = document.createElement('span');
+      span.className = 'ios-row-text';
       span.textContent = p.name;
       if((p.wins||0) + (p.losses||0) > 0){
         const tag = document.createElement('span');
@@ -625,10 +646,10 @@
         span.appendChild(tag);
       }
       const btn = document.createElement('button');
-      btn.className = 'remove';
+      btn.className = 'minus-circle';
       btn.type = 'button';
       btn.setAttribute('aria-label', 'Entfernen: ' + p.name);
-      btn.textContent = '✕';
+      btn.textContent = '−';
       btn.addEventListener('click', ()=>{
         roster = roster.filter(x=>x.id !== p.id);
         saveState();
@@ -646,6 +667,10 @@
       ? 'Mit Enter bestätigen. Mindestens 2 Spieler nötig.'
       : 'Änderungen möglich, bevor die Runde startet.';
     lobbySecondaryBtns.style.display = roster.length > 0 ? 'flex' : 'none';
+
+    if(currentScreen === 'lobby'){
+      topbarSubtitle.textContent = roster.length > 0 ? roster.length + ' Spieler gespeichert' : 'Spieler & Regeln festlegen';
+    }
   }
 
   function addPlayerFromInput(){
@@ -676,12 +701,6 @@
     goToGame();
   });
 
-  document.getElementById('lobby-overview-btn').addEventListener('click', ()=>{
-    overviewReturnTo = 'lobby';
-    renderOverview();
-    showScreen('overview');
-  });
-
   document.getElementById('lobby-reset-all-btn').addEventListener('click', ()=>{
     if(confirm('Alle Spieler und die gesamte Statistik unwiderruflich löschen?')){
       clearAll();
@@ -692,7 +711,7 @@
 
   // ---------- game ----------
   function goToGame(){
-    winnerOverlay.style.display = 'none';
+    closeSheet(winnerSheet, winnerBackdrop);
     renderTiles();
     showScreen('game');
     if(round.finished) showWinnerOverlay();
@@ -701,10 +720,10 @@
   function renderTiles(){
     tilesEl.innerHTML = '';
     const aliveCount = round.players.filter(p=>!p.out).length;
-    aliveTag.textContent = aliveCount + ' von ' + round.players.length + ' Spielern im Spiel';
-    const gameModeTag = document.getElementById('game-mode-tag');
     const roundMode = round.mode === 'firstOut' ? 'firstOut' : 'last';
-    gameModeTag.textContent = MODE_LABELS[roundMode].tag;
+    if(currentScreen === 'game' || true){
+      topbarSubtitle.textContent = aliveCount + ' von ' + round.players.length + ' im Spiel · ' + MODE_LABELS[roundMode].tag;
+    }
 
     round.players.forEach(rp=>{
       const rosterPlayer = roster.find(r=>r.id === rp.id);
@@ -723,7 +742,7 @@
       undoBtn.type = 'button';
       undoBtn.title = 'Letztes Leben zurückgeben';
       undoBtn.setAttribute('aria-label', 'Leben zurückgeben für ' + displayName);
-      undoBtn.textContent = '↺';
+      undoBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-2"/></svg>';
       undoBtn.disabled = rp.lives >= rp.maxLives || round.finished;
       undoBtn.addEventListener('click', ()=> undoLife(rp.id));
       top.appendChild(name);
@@ -776,13 +795,11 @@
     renderTiles();
   }
 
-  // justOutId = id of the player who just hit 0 lives with this action
   function checkRoundEnd(justOutId){
     if(round.finished) return;
     const roundMode = round.mode === 'firstOut' ? 'firstOut' : 'last';
 
     if(roundMode === 'firstOut'){
-      // round ends the instant anyone reaches 0 lives: that player loses, everyone else wins
       round.finished = true;
       round.specialId = justOutId;
       round.players.forEach(rp=>{
@@ -797,7 +814,6 @@
       return;
     }
 
-    // 'last' mode: round ends once only one player still has lives left
     const alive = round.players.filter(p=>!p.out);
     if(alive.length === 1 && round.players.length > 1){
       round.finished = true;
@@ -818,12 +834,11 @@
     const roundMode = round.mode === 'firstOut' ? 'firstOut' : 'last';
     const rosterPlayer = roster.find(r=>r.id === round.specialId);
     const displayName = rosterPlayer ? rosterPlayer.name : '—';
-    const winnerCard = document.getElementById('winner-card');
     const winnerEyebrow = document.getElementById('winner-eyebrow');
     const winnerSub = document.getElementById('winner-sub');
 
     if(roundMode === 'firstOut'){
-      winnerCard.classList.add('loss-style');
+      winnerSheet.classList.add('loss-style');
       winnerEyebrow.textContent = 'Zuerst ohne Leben';
       winnerNameEl.textContent = displayName;
       const others = round.players.length - 1;
@@ -831,39 +846,31 @@
         ? 'Die anderen ' + others + ' Spieler gewinnen die Runde.'
         : 'Der andere Spieler gewinnt die Runde.';
     } else {
-      winnerCard.classList.remove('loss-style');
+      winnerSheet.classList.remove('loss-style');
       winnerEyebrow.textContent = 'Letzter am Tisch';
       winnerNameEl.textContent = displayName;
       winnerSub.textContent = '';
     }
-    winnerOverlay.style.display = 'flex';
+    openSheet(winnerSheet, winnerBackdrop);
   }
 
-  document.getElementById('game-overview-btn').addEventListener('click', ()=>{
-    overviewReturnTo = 'game';
-    renderOverview();
-    showScreen('overview');
-  });
-
-  document.getElementById('game-newround-btn').addEventListener('click', ()=>{
+  navNewRoundBtn.addEventListener('click', ()=>{
     const proceed = round.finished || confirm('Aktuelle Runde abbrechen und zurück zur Spielerliste?');
     if(!proceed) return;
-    winnerOverlay.style.display = 'none';
+    closeSheet(winnerSheet, winnerBackdrop);
     renderLobby();
     showScreen('lobby');
   });
 
-  // ---------- winner overlay actions ----------
   document.getElementById('winner-newround-btn').addEventListener('click', ()=>{
-    winnerOverlay.style.display = 'none';
+    closeSheet(winnerSheet, winnerBackdrop);
     renderLobby();
     showScreen('lobby');
   });
   document.getElementById('winner-overview-btn').addEventListener('click', ()=>{
-    overviewReturnTo = 'game';
+    closeSheet(winnerSheet, winnerBackdrop);
     renderOverview();
-    showScreen('overview');
-    winnerOverlay.style.display = 'none';
+    openSheet(overviewSheet, overviewBackdrop);
   });
 
   // ---------- overview ----------
@@ -905,15 +912,12 @@
     }
   }
 
-  document.getElementById('overview-back-btn').addEventListener('click', ()=>{
-    if(overviewReturnTo === 'game' && round.active){
-      renderTiles();
-      showScreen('game');
-      if(round.finished) showWinnerOverlay();
-    } else {
-      renderLobby();
-      showScreen('lobby');
-    }
+  navOverviewBtn.addEventListener('click', ()=>{
+    renderOverview();
+    openSheet(overviewSheet, overviewBackdrop);
+  });
+  document.getElementById('overview-close-btn').addEventListener('click', ()=>{
+    closeSheet(overviewSheet, overviewBackdrop);
   });
 
   document.getElementById('overview-reset-stats-btn').addEventListener('click', ()=>{
@@ -922,19 +926,21 @@
       roster.forEach(p=>{ p.wins = 0; p.losses = 0; });
       saveState();
       renderOverview();
+      renderLobby();
     }
   });
 
   document.getElementById('overview-reset-all-btn').addEventListener('click', ()=>{
     if(confirm('Alle Spieler und die gesamte Statistik unwiderruflich löschen?')){
       clearAll();
+      closeSheet(overviewSheet, overviewBackdrop);
       renderLobby();
       showScreen('lobby');
     }
   });
 
   // ---------- init ----------
-  const restored = loadState();
+  const restored = loadLocalState();
   if(restored && round.active && round.players.length > 0){
     renderLobby();
     goToGame();
@@ -946,7 +952,7 @@
   // ---------- PWA: service worker ----------
   if('serviceWorker' in navigator){
     window.addEventListener('load', ()=>{
-      navigator.serviceWorker.register('./sw.js').catch(()=>{ /* offline support unavailable */ });
+      navigator.serviceWorker.register('./sw.js').catch(()=>{});
     });
   }
 })();

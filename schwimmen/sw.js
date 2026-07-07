@@ -1,4 +1,4 @@
-const CACHE_NAME = 'schwimmen-leben-v2';
+const CACHE_NAME = 'schwimmen-leben-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -27,6 +27,12 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+
+  // Nur eigene (same-origin) Dateien cachen. Firestore-Sync und Google Fonts
+  // sollen immer direkt ans Netzwerk gehen (nicht abfangen/cachen) -
+  // sonst kann das Syncen mit der Cloud kaputtgehen.
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
 
   event.respondWith(
     caches.match(event.request).then((cached) => {
