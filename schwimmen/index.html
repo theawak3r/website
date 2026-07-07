@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Schwimmen — Lebenszähler</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0B3D2E">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Schwimmen">
+<meta name="mobile-web-app-capable" content="yes">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --felt-dark:#0B3D2E;
+    --felt-mid:#12523C;
+    --felt-line: rgba(243,236,221,0.14);
+    --cream:#F3ECDD;
+    --cream-dim:#D9D0BC;
+    --ink:#1E2A22;
+    --brass:#C9A227;
+    --brass-bright:#E4C55A;
+    --red-out:#A63A2E;
+    --green-win:#3E8A67;
+    --shadow: 0 12px 30px rgba(0,0,0,0.35);
+  }
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse at top, rgba(255,255,255,0.05), transparent 60%),
+      var(--felt-dark);
+    background-attachment:fixed;
+    color:var(--cream);
+    font-family:'Inter', sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:32px 16px 64px;
+  }
+  .wrap{ width:100%; max-width:760px; }
+
+  h1.title{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size: clamp(28px, 6vw, 44px);
+    text-align:center;
+    letter-spacing:0.5px;
+    margin:0 0 4px;
+    color:var(--cream);
+  }
+  p.subtitle{
+    text-align:center;
+    color:var(--cream-dim);
+    font-size:14px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    margin:0 0 36px;
+  }
+  p.subtitle .divider{ color:var(--brass); margin:0 8px; }
+
+  .panel{
+    background:var(--felt-mid);
+    border:1px solid var(--felt-line);
+    border-radius:18px;
+    padding:28px;
+    box-shadow:var(--shadow);
+  }
+  .field-label{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:1.2px;
+    color:var(--cream-dim);
+    display:block;
+    margin-bottom:8px;
+  }
+  .lives-stepper{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:28px;
+  }
+  .stepper-btn{
+    width:40px; height:40px;
+    border-radius:10px;
+    border:1px solid var(--felt-line);
+    background:rgba(243,236,221,0.06);
+    color:var(--cream);
+    font-size:20px;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:background .15s ease, transform .1s ease;
+  }
+  .stepper-btn:hover{ background:rgba(243,236,221,0.14); }
+  .stepper-btn:active{ transform:scale(0.94); }
+  .lives-value{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:26px;
+    font-weight:600;
+    min-width:34px;
+    text-align:center;
+    color:var(--brass-bright);
+  }
+
+  .segmented{
+    display:flex;
+    gap:8px;
+    margin-bottom:10px;
+    flex-wrap:wrap;
+  }
+  .segmented button{
+    flex:1 1 160px;
+    padding:12px 14px;
+    border-radius:10px;
+    border:1px solid var(--felt-line);
+    background:rgba(243,236,221,0.05);
+    color:var(--cream-dim);
+    font-size:13px;
+    font-weight:600;
+    text-align:left;
+    cursor:pointer;
+    transition:background .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .segmented button strong{
+    display:block;
+    font-size:14px;
+    font-weight:700;
+    color:var(--cream);
+    margin-bottom:2px;
+  }
+  .segmented button:hover{ background:rgba(243,236,221,0.1); }
+  .segmented button.active{
+    border-color:var(--brass);
+    background:rgba(201,162,39,0.14);
+    color:var(--cream);
+  }
+  .segmented button.active strong{ color:var(--brass-bright); }
+  .mode-hint{ font-size:13px; color:var(--cream-dim); margin:0 0 24px; }
+
+  .mode-tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--cream-dim);
+    letter-spacing:0.5px;
+    display:block;
+    margin-top:2px;
+  }
+
+  .winner-sub{
+    font-size:14px;
+    color:var(--cream-dim);
+    margin:-14px 0 24px;
+  }
+  .winner-card.loss-style{ border-color:var(--red-out); }
+  .winner-card.loss-style .winner-eyebrow{ color:#E08A7D; }
+  .winner-card.loss-style .winner-name{ color:#E08A7D; }
+
+  .player-row{ display:flex; gap:10px; margin-bottom:12px; }
+  input[type="text"]{
+    flex:1;
+    background:rgba(243,236,221,0.07);
+    border:1px solid var(--felt-line);
+    border-radius:10px;
+    padding:12px 14px;
+    color:var(--cream);
+    font-size:15px;
+    font-family:'Inter', sans-serif;
+  }
+  input[type="text"]::placeholder{ color:rgba(243,236,221,0.4); }
+  input[type="text"]:focus, .stepper-btn:focus-visible, button:focus-visible{
+    outline:2px solid var(--brass-bright);
+    outline-offset:2px;
+  }
+  .add-btn{
+    width:48px;
+    border-radius:10px;
+    border:none;
+    background:var(--brass);
+    color:var(--ink);
+    font-size:20px;
+    font-weight:700;
+    cursor:pointer;
+    transition:background .15s ease;
+  }
+  .add-btn:hover{ background:var(--brass-bright); }
+
+  .player-list{ list-style:none; padding:0; margin:4px 0 24px; display:flex; flex-direction:column; gap:8px; }
+  .player-list li{
+    display:flex; align-items:center; justify-content:space-between;
+    background:rgba(243,236,221,0.05);
+    border:1px solid var(--felt-line);
+    border-radius:10px;
+    padding:10px 14px;
+    font-size:15px;
+  }
+  .player-list .played-tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--cream-dim);
+    margin-left:10px;
+  }
+  .player-list .remove{
+    background:none; border:none; color:var(--cream-dim);
+    font-size:16px; cursor:pointer; line-height:1;
+  }
+  .player-list .remove:hover{ color:var(--red-out); }
+
+  .hint{ font-size:13px; color:var(--cream-dim); margin:-8px 0 20px; }
+  .empty-hint{ font-size:14px; color:var(--cream-dim); margin:8px 0 24px; }
+
+  .primary-btn{
+    width:100%;
+    padding:16px;
+    border:none;
+    border-radius:12px;
+    background:var(--brass);
+    color:var(--ink);
+    font-size:16px;
+    font-weight:700;
+    letter-spacing:0.4px;
+    cursor:pointer;
+    transition:background .15s ease, transform .08s ease;
+  }
+  .primary-btn:hover:not(:disabled){ background:var(--brass-bright); }
+  .primary-btn:active:not(:disabled){ transform:scale(0.99); }
+  .primary-btn:disabled{ opacity:0.4; cursor:not-allowed; }
+
+  .btn-row{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:14px; }
+
+  .ghost-btn{
+    padding:10px 16px;
+    border-radius:10px;
+    border:1px solid var(--felt-line);
+    background:transparent;
+    color:var(--cream-dim);
+    font-size:13px;
+    cursor:pointer;
+    transition:background .15s ease, color .15s ease;
+  }
+  .ghost-btn:hover{ background:rgba(243,236,221,0.08); color:var(--cream); }
+  .ghost-btn.danger:hover{ color:var(--red-out); }
+
+  /* ---------- screens ---------- */
+  #lobby-screen, #game-screen, #overview-screen{ display:none; }
+
+  .game-header{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:22px; gap:10px; flex-wrap:wrap;
+  }
+  .round-tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    color:var(--brass-bright);
+    letter-spacing:1px;
+  }
+  .header-btns{ display:flex; gap:8px; }
+
+  .tiles{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(180px,1fr));
+    gap:16px;
+  }
+  .tile{
+    position:relative;
+    background:var(--felt-mid);
+    border:1px solid var(--felt-line);
+    border-radius:16px;
+    padding:18px 16px 16px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+    transition:opacity .3s ease, filter .3s ease;
+  }
+  .tile.out{ opacity:0.55; filter:grayscale(0.6); }
+
+  .tile-top{ display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:14px; }
+  .tile-name{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:19px;
+    word-break:break-word;
+    padding-right:8px;
+  }
+  .undo-btn{
+    background:none; border:none; color:var(--cream-dim);
+    font-size:15px; cursor:pointer; line-height:1; padding:2px 4px;
+  }
+  .undo-btn:hover{ color:var(--brass-bright); }
+  .undo-btn:disabled{ opacity:0.25; cursor:not-allowed; }
+
+  .cards-row{
+    display:flex; gap:6px; flex-wrap:wrap; min-height:38px; margin-bottom:16px;
+  }
+  .life-card{
+    width:22px; height:32px;
+    border-radius:4px;
+    background:linear-gradient(135deg, var(--cream), var(--cream-dim));
+    border:1px solid rgba(0,0,0,0.15);
+    box-shadow:0 2px 4px rgba(0,0,0,0.25);
+    transition:transform .35s ease, background .35s ease, opacity .35s ease;
+  }
+  .life-card.lost{
+    background:linear-gradient(135deg, #3a2c22, #241a14);
+    transform:rotateY(180deg) translateY(4px);
+    opacity:0.5;
+  }
+
+  .minus-btn{
+    width:100%;
+    padding:11px;
+    border:none;
+    border-radius:9px;
+    background:rgba(166,58,46,0.85);
+    color:var(--cream);
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    transition:background .15s ease, transform .08s ease;
+  }
+  .minus-btn:hover:not(:disabled){ background:var(--red-out); }
+  .minus-btn:active:not(:disabled){ transform:scale(0.98); }
+  .minus-btn:disabled{ opacity:0.3; cursor:not-allowed; }
+
+  .stamp{
+    position:absolute;
+    top:38%; left:50%;
+    transform:translate(-50%,-50%) rotate(-18deg);
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:22px;
+    color:var(--red-out);
+    border:3px solid var(--red-out);
+    border-radius:8px;
+    padding:2px 10px;
+    letter-spacing:2px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .3s ease;
+  }
+  .tile.out .stamp{ opacity:0.85; }
+
+  /* ---------- overview / stats ---------- */
+  .stats-table{ width:100%; border-collapse:collapse; margin:8px 0 8px; }
+  .stats-table th, .stats-table td{
+    text-align:left; padding:12px 10px;
+    border-bottom:1px solid var(--felt-line);
+    font-size:14px;
+  }
+  .stats-table th{
+    font-size:11px; text-transform:uppercase; letter-spacing:1px;
+    color:var(--cream-dim); font-weight:600;
+  }
+  .stats-table td.num, .stats-table th.num{ text-align:center; font-family:'IBM Plex Mono', monospace; }
+  .stats-table tr:last-child td{ border-bottom:none; }
+  .rank-badge{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:22px; height:22px; border-radius:50%;
+    background:rgba(201,162,39,0.18); color:var(--brass-bright);
+    font-family:'IBM Plex Mono', monospace; font-size:11px; margin-right:8px;
+  }
+  .win-count{ color:var(--green-win); font-weight:600; }
+  .loss-count{ color:var(--red-out); font-weight:600; }
+
+  /* ---------- winner overlay ---------- */
+  #winner-overlay{
+    display:none;
+    position:fixed; inset:0;
+    background:rgba(6,20,14,0.88);
+    align-items:center; justify-content:center;
+    z-index:50;
+    padding:24px;
+  }
+  .winner-card{
+    background:var(--felt-mid);
+    border:1px solid var(--brass);
+    border-radius:20px;
+    padding:44px 36px;
+    text-align:center;
+    max-width:420px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.5);
+  }
+  .winner-eyebrow{
+    font-size:13px; letter-spacing:2px; text-transform:uppercase;
+    color:var(--brass-bright); margin-bottom:10px;
+  }
+  .winner-name{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:36px;
+    margin:0 0 24px;
+  }
+
+  @media (max-width:420px){
+    .tiles{ grid-template-columns:1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <h1 class="title">Schwimmen</h1>
+  <p class="subtitle">Lebenszähler <span class="divider">·</span> für den Kartentisch</p>
+
+  <!-- LOBBY: Spieler definieren / verwalten, Runde starten -->
+  <div id="lobby-screen" class="panel">
+    <span class="field-label">Startleben pro Spieler</span>
+    <div class="lives-stepper">
+      <button class="stepper-btn" id="lives-minus" type="button" aria-label="Weniger Startleben">−</button>
+      <span class="lives-value" id="lives-value">3</span>
+      <button class="stepper-btn" id="lives-plus" type="button" aria-label="Mehr Startleben">+</button>
+    </div>
+
+    <span class="field-label">Rundenende</span>
+    <div class="segmented" id="mode-toggle">
+      <button type="button" id="mode-last-btn" data-mode="last">
+        <strong>Letzter übrig</strong>
+        Sieg für den letzten Spieler mit Leben, Niederlage für den Rest
+      </button>
+      <button type="button" id="mode-firstout-btn" data-mode="firstOut">
+        <strong>Erster ohne Leben</strong>
+        Niederlage für den Ersten bei 0 Leben, Sieg für alle übrigen
+      </button>
+    </div>
+    <p class="mode-hint" id="mode-hint"></p>
+
+    <span class="field-label">Spieler</span>
+    <div class="player-row">
+      <input type="text" id="player-input" placeholder="Name eingeben…" maxlength="20">
+      <button class="add-btn" id="add-player-btn" type="button" aria-label="Spieler hinzufügen">+</button>
+    </div>
+    <p class="hint" id="lobby-hint">Mit Enter bestätigen. Mindestens 2 Spieler nötig.</p>
+
+    <ul class="player-list" id="player-list"></ul>
+
+    <button class="primary-btn" id="start-btn" disabled>Spiel starten</button>
+
+    <div class="btn-row" id="lobby-secondary-btns" style="display:none;">
+      <button class="ghost-btn" id="lobby-overview-btn" type="button">Übersicht</button>
+      <button class="ghost-btn danger" id="lobby-reset-all-btn" type="button">Alles zurücksetzen</button>
+    </div>
+  </div>
+
+  <!-- GAME -->
+  <div id="game-screen">
+    <div class="game-header">
+      <div>
+        <span class="round-tag" id="alive-tag">— Spieler im Spiel</span>
+        <span class="mode-tag" id="game-mode-tag"></span>
+      </div>
+      <div class="header-btns">
+        <button class="ghost-btn" id="game-overview-btn" type="button">Übersicht</button>
+        <button class="ghost-btn" id="game-newround-btn" type="button">Neue Runde</button>
+      </div>
+    </div>
+
+    <div class="tiles" id="tiles"></div>
+  </div>
+
+  <!-- OVERVIEW / STATS -->
+  <div id="overview-screen" class="panel">
+    <div class="game-header">
+      <span class="round-tag">Statistik</span>
+    </div>
+    <table class="stats-table" id="stats-table">
+      <thead>
+        <tr>
+          <th>Spieler</th>
+          <th class="num">Siege</th>
+          <th class="num">Verlorene Runden</th>
+        </tr>
+      </thead>
+      <tbody id="stats-tbody"></tbody>
+    </table>
+    <p class="empty-hint" id="stats-empty-hint" style="display:none;">Noch keine Runde gespielt.</p>
+
+    <div class="btn-row">
+      <button class="ghost-btn" id="overview-back-btn" type="button">Zurück</button>
+      <button class="ghost-btn" id="overview-reset-stats-btn" type="button">Statistik zurücksetzen</button>
+      <button class="ghost-btn danger" id="overview-reset-all-btn" type="button">Alles zurücksetzen</button>
+    </div>
+  </div>
+</div>
+
+<!-- WINNER -->
+<div id="winner-overlay">
+  <div class="winner-card" id="winner-card">
+    <div class="winner-eyebrow" id="winner-eyebrow">Letzter am Tisch</div>
+    <h2 class="winner-name" id="winner-name">—</h2>
+    <p class="winner-sub" id="winner-sub"></p>
+    <div class="btn-row">
+      <button class="primary-btn" id="winner-newround-btn" style="width:auto; flex:1 1 auto;">Neue Runde</button>
+    </div>
+    <div class="btn-row">
+      <button class="ghost-btn" id="winner-overview-btn" type="button">Übersicht</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const STORAGE_KEY = 'schwimmen-state-v2';
+
+  // roster: [{id, name, wins, losses}]  — persists across rounds
+  // round: { active, finished, mode, specialId, players:[{id,lives,maxLives,out}] }
+  // specialId = winner (mode 'last') or loser (mode 'firstOut')
+  let roster = [];
+  let startLives = 3;
+  let mode = 'last'; // 'last' = letzter übrig gewinnt | 'firstOut' = erster ohne Leben verliert
+  let round = { active:false, finished:false, mode:'last', specialId:null, players:[] };
+  let nextId = 1;
+  let overviewReturnTo = 'lobby'; // 'lobby' or 'game'
+
+  const MODE_LABELS = {
+    last: { tag:'Modus: Letzter übrig gewinnt' },
+    firstOut: { tag:'Modus: Erster ohne Leben beendet die Runde' }
+  };
+
+  // ---------- persistence ----------
+  function saveState(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ roster, startLives, mode, round, nextId }));
+    }catch(e){ /* storage unavailable, ignore */ }
+  }
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return false;
+      const data = JSON.parse(raw);
+      if(data && Array.isArray(data.roster)){
+        roster = data.roster;
+        startLives = data.startLives || 3;
+        mode = data.mode === 'firstOut' ? 'firstOut' : 'last';
+        round = data.round || { active:false, finished:false, mode:'last', specialId:null, players:[] };
+        nextId = data.nextId || (roster.length + 1);
+        return true;
+      }
+    }catch(e){ /* ignore */ }
+    return false;
+  }
+  function clearAll(){
+    roster = [];
+    round = { active:false, finished:false, mode:'last', specialId:null, players:[] };
+    startLives = 3;
+    mode = 'last';
+    try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+  }
+
+  // ---------- elements ----------
+  const lobbyScreen = document.getElementById('lobby-screen');
+  const gameScreen = document.getElementById('game-screen');
+  const overviewScreen = document.getElementById('overview-screen');
+  const winnerOverlay = document.getElementById('winner-overlay');
+
+  const livesValueEl = document.getElementById('lives-value');
+  const playerInput = document.getElementById('player-input');
+  const playerListEl = document.getElementById('player-list');
+  const startBtn = document.getElementById('start-btn');
+  const lobbyHint = document.getElementById('lobby-hint');
+  const lobbySecondaryBtns = document.getElementById('lobby-secondary-btns');
+
+  const tilesEl = document.getElementById('tiles');
+  const aliveTag = document.getElementById('alive-tag');
+
+  const winnerNameEl = document.getElementById('winner-name');
+  const statsTbody = document.getElementById('stats-tbody');
+  const statsEmptyHint = document.getElementById('stats-empty-hint');
+
+  // ---------- screen switching ----------
+  function showScreen(name){
+    lobbyScreen.style.display = name === 'lobby' ? 'block' : 'none';
+    gameScreen.style.display = name === 'game' ? 'block' : 'none';
+    overviewScreen.style.display = name === 'overview' ? 'block' : 'none';
+  }
+
+  // ---------- lobby ----------
+  document.getElementById('lives-minus').addEventListener('click', ()=>{
+    startLives = Math.max(1, startLives - 1);
+    livesValueEl.textContent = startLives;
+    saveState();
+  });
+  document.getElementById('lives-plus').addEventListener('click', ()=>{
+    startLives = Math.min(9, startLives + 1);
+    livesValueEl.textContent = startLives;
+    saveState();
+  });
+
+  const modeLastBtn = document.getElementById('mode-last-btn');
+  const modeFirstOutBtn = document.getElementById('mode-firstout-btn');
+  const modeHint = document.getElementById('mode-hint');
+
+  function syncModeUI(){
+    modeLastBtn.classList.toggle('active', mode === 'last');
+    modeFirstOutBtn.classList.toggle('active', mode === 'firstOut');
+    modeHint.textContent = mode === 'last'
+      ? 'Die Runde läuft weiter, bis nur noch ein Spieler Leben übrig hat. Der Rest kassiert je eine verlorene Runde.'
+      : 'Sobald der erste Spieler bei 0 Leben landet, endet die Runde sofort. Nur dieser Spieler bekommt eine Niederlage, alle anderen einen Sieg.';
+  }
+  function setMode(newMode){
+    mode = newMode;
+    syncModeUI();
+    saveState();
+  }
+  modeLastBtn.addEventListener('click', ()=> setMode('last'));
+  modeFirstOutBtn.addEventListener('click', ()=> setMode('firstOut'));
+
+  function renderLobby(){
+    livesValueEl.textContent = startLives;
+    syncModeUI();
+    playerListEl.innerHTML = '';
+    roster.forEach(p=>{
+      const li = document.createElement('li');
+      const span = document.createElement('span');
+      span.textContent = p.name;
+      if((p.wins||0) + (p.losses||0) > 0){
+        const tag = document.createElement('span');
+        tag.className = 'played-tag';
+        tag.textContent = '(' + p.wins + 'S / ' + p.losses + 'N)';
+        span.appendChild(tag);
+      }
+      const btn = document.createElement('button');
+      btn.className = 'remove';
+      btn.type = 'button';
+      btn.setAttribute('aria-label', 'Entfernen: ' + p.name);
+      btn.textContent = '✕';
+      btn.addEventListener('click', ()=>{
+        roster = roster.filter(x=>x.id !== p.id);
+        saveState();
+        renderLobby();
+      });
+      li.appendChild(span);
+      li.appendChild(btn);
+      playerListEl.appendChild(li);
+    });
+
+    startBtn.disabled = roster.length < 2;
+    const alreadyPlayed = roster.some(p=>(p.wins||0)+(p.losses||0) > 0);
+    startBtn.textContent = alreadyPlayed ? 'Neue Runde starten' : 'Spiel starten';
+    lobbyHint.textContent = roster.length < 2
+      ? 'Mit Enter bestätigen. Mindestens 2 Spieler nötig.'
+      : 'Änderungen möglich, bevor die Runde startet.';
+    lobbySecondaryBtns.style.display = roster.length > 0 ? 'flex' : 'none';
+  }
+
+  function addPlayerFromInput(){
+    const name = playerInput.value.trim();
+    if(!name) return;
+    roster.push({ id: nextId++, name, wins:0, losses:0 });
+    playerInput.value = '';
+    saveState();
+    renderLobby();
+    playerInput.focus();
+  }
+
+  document.getElementById('add-player-btn').addEventListener('click', addPlayerFromInput);
+  playerInput.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){ e.preventDefault(); addPlayerFromInput(); }
+  });
+
+  startBtn.addEventListener('click', ()=>{
+    if(roster.length < 2) return;
+    round = {
+      active: true,
+      finished: false,
+      mode: mode,
+      specialId: null,
+      players: roster.map(r => ({ id:r.id, lives:startLives, maxLives:startLives, out:false }))
+    };
+    saveState();
+    goToGame();
+  });
+
+  document.getElementById('lobby-overview-btn').addEventListener('click', ()=>{
+    overviewReturnTo = 'lobby';
+    renderOverview();
+    showScreen('overview');
+  });
+
+  document.getElementById('lobby-reset-all-btn').addEventListener('click', ()=>{
+    if(confirm('Alle Spieler und die gesamte Statistik unwiderruflich löschen?')){
+      clearAll();
+      renderLobby();
+      showScreen('lobby');
+    }
+  });
+
+  // ---------- game ----------
+  function goToGame(){
+    winnerOverlay.style.display = 'none';
+    renderTiles();
+    showScreen('game');
+    if(round.finished) showWinnerOverlay();
+  }
+
+  function renderTiles(){
+    tilesEl.innerHTML = '';
+    const aliveCount = round.players.filter(p=>!p.out).length;
+    aliveTag.textContent = aliveCount + ' von ' + round.players.length + ' Spielern im Spiel';
+    const gameModeTag = document.getElementById('game-mode-tag');
+    const roundMode = round.mode === 'firstOut' ? 'firstOut' : 'last';
+    gameModeTag.textContent = MODE_LABELS[roundMode].tag;
+
+    round.players.forEach(rp=>{
+      const rosterPlayer = roster.find(r=>r.id === rp.id);
+      const displayName = rosterPlayer ? rosterPlayer.name : '?';
+
+      const tile = document.createElement('div');
+      tile.className = 'tile' + (rp.out ? ' out' : '');
+
+      const top = document.createElement('div');
+      top.className = 'tile-top';
+      const name = document.createElement('div');
+      name.className = 'tile-name';
+      name.textContent = displayName;
+      const undoBtn = document.createElement('button');
+      undoBtn.className = 'undo-btn';
+      undoBtn.type = 'button';
+      undoBtn.title = 'Letztes Leben zurückgeben';
+      undoBtn.setAttribute('aria-label', 'Leben zurückgeben für ' + displayName);
+      undoBtn.textContent = '↺';
+      undoBtn.disabled = rp.lives >= rp.maxLives || round.finished;
+      undoBtn.addEventListener('click', ()=> undoLife(rp.id));
+      top.appendChild(name);
+      top.appendChild(undoBtn);
+
+      const cardsRow = document.createElement('div');
+      cardsRow.className = 'cards-row';
+      for(let i=0; i<rp.maxLives; i++){
+        const card = document.createElement('div');
+        card.className = 'life-card' + (i >= rp.lives ? ' lost' : '');
+        cardsRow.appendChild(card);
+      }
+
+      const minusBtn = document.createElement('button');
+      minusBtn.className = 'minus-btn';
+      minusBtn.type = 'button';
+      minusBtn.textContent = '− Leben abziehen';
+      minusBtn.disabled = rp.out || round.finished;
+      minusBtn.addEventListener('click', ()=> loseLife(rp.id));
+
+      const stamp = document.createElement('div');
+      stamp.className = 'stamp';
+      stamp.textContent = 'RAUS';
+
+      tile.appendChild(top);
+      tile.appendChild(cardsRow);
+      tile.appendChild(minusBtn);
+      tile.appendChild(stamp);
+      tilesEl.appendChild(tile);
+    });
+  }
+
+  function loseLife(id){
+    const rp = round.players.find(x=>x.id === id);
+    if(!rp || rp.out || round.finished) return;
+    rp.lives = Math.max(0, rp.lives - 1);
+    let justEliminated = false;
+    if(rp.lives === 0){ rp.out = true; justEliminated = true; }
+    saveState();
+    renderTiles();
+    if(justEliminated) checkRoundEnd(rp.id);
+  }
+
+  function undoLife(id){
+    const rp = round.players.find(x=>x.id === id);
+    if(!rp || round.finished) return;
+    rp.lives = Math.min(rp.maxLives, rp.lives + 1);
+    if(rp.lives > 0) rp.out = false;
+    saveState();
+    renderTiles();
+  }
+
+  // justOutId = id of the player who just hit 0 lives with this action
+  function checkRoundEnd(justOutId){
+    if(round.finished) return;
+    const roundMode = round.mode === 'firstOut' ? 'firstOut' : 'last';
+
+    if(roundMode === 'firstOut'){
+      // round ends the instant anyone reaches 0 lives: that player loses, everyone else wins
+      round.finished = true;
+      round.specialId = justOutId;
+      round.players.forEach(rp=>{
+        const rosterPlayer = roster.find(r=>r.id === rp.id);
+        if(!rosterPlayer) return;
+        if(rp.id === justOutId){ rosterPlayer.losses = (rosterPlayer.losses || 0) + 1; }
+        else { rosterPlayer.wins = (rosterPlayer.wins || 0) + 1; }
+      });
+      saveState();
+      renderTiles();
+      showWinnerOverlay();
+      return;
+    }
+
+    // 'last' mode: round ends once only one player still has lives left
+    const alive = round.players.filter(p=>!p.out);
+    if(alive.length === 1 && round.players.length > 1){
+      round.finished = true;
+      round.specialId = alive[0].id;
+      round.players.forEach(rp=>{
+        const rosterPlayer = roster.find(r=>r.id === rp.id);
+        if(!rosterPlayer) return;
+        if(rp.id === round.specialId){ rosterPlayer.wins = (rosterPlayer.wins || 0) + 1; }
+        else { rosterPlayer.losses = (rosterPlayer.losses || 0) + 1; }
+      });
+      saveState();
+      renderTiles();
+      showWinnerOverlay();
+    }
+  }
+
+  function showWinnerOverlay(){
+    const roundMode = round.mode === 'firstOut' ? 'firstOut' : 'last';
+    const rosterPlayer = roster.find(r=>r.id === round.specialId);
+    const displayName = rosterPlayer ? rosterPlayer.name : '—';
+    const winnerCard = document.getElementById('winner-card');
+    const winnerEyebrow = document.getElementById('winner-eyebrow');
+    const winnerSub = document.getElementById('winner-sub');
+
+    if(roundMode === 'firstOut'){
+      winnerCard.classList.add('loss-style');
+      winnerEyebrow.textContent = 'Zuerst ohne Leben';
+      winnerNameEl.textContent = displayName;
+      const others = round.players.length - 1;
+      winnerSub.textContent = others > 1
+        ? 'Die anderen ' + others + ' Spieler gewinnen die Runde.'
+        : 'Der andere Spieler gewinnt die Runde.';
+    } else {
+      winnerCard.classList.remove('loss-style');
+      winnerEyebrow.textContent = 'Letzter am Tisch';
+      winnerNameEl.textContent = displayName;
+      winnerSub.textContent = '';
+    }
+    winnerOverlay.style.display = 'flex';
+  }
+
+  document.getElementById('game-overview-btn').addEventListener('click', ()=>{
+    overviewReturnTo = 'game';
+    renderOverview();
+    showScreen('overview');
+  });
+
+  document.getElementById('game-newround-btn').addEventListener('click', ()=>{
+    const proceed = round.finished || confirm('Aktuelle Runde abbrechen und zurück zur Spielerliste?');
+    if(!proceed) return;
+    winnerOverlay.style.display = 'none';
+    renderLobby();
+    showScreen('lobby');
+  });
+
+  // ---------- winner overlay actions ----------
+  document.getElementById('winner-newround-btn').addEventListener('click', ()=>{
+    winnerOverlay.style.display = 'none';
+    renderLobby();
+    showScreen('lobby');
+  });
+  document.getElementById('winner-overview-btn').addEventListener('click', ()=>{
+    overviewReturnTo = 'game';
+    renderOverview();
+    showScreen('overview');
+    winnerOverlay.style.display = 'none';
+  });
+
+  // ---------- overview ----------
+  function renderOverview(){
+    const sorted = [...roster].sort((a,b)=>{
+      const bw = (b.wins||0) - (a.wins||0);
+      if(bw !== 0) return bw;
+      return (a.losses||0) - (b.losses||0);
+    });
+
+    statsTbody.innerHTML = '';
+    if(sorted.length === 0){
+      statsEmptyHint.style.display = 'block';
+    } else {
+      statsEmptyHint.style.display = 'none';
+      sorted.forEach((p, idx)=>{
+        const tr = document.createElement('tr');
+
+        const nameTd = document.createElement('td');
+        const badge = document.createElement('span');
+        badge.className = 'rank-badge';
+        badge.textContent = idx + 1;
+        nameTd.appendChild(badge);
+        nameTd.appendChild(document.createTextNode(p.name));
+
+        const winsTd = document.createElement('td');
+        winsTd.className = 'num win-count';
+        winsTd.textContent = p.wins || 0;
+
+        const lossTd = document.createElement('td');
+        lossTd.className = 'num loss-count';
+        lossTd.textContent = p.losses || 0;
+
+        tr.appendChild(nameTd);
+        tr.appendChild(winsTd);
+        tr.appendChild(lossTd);
+        statsTbody.appendChild(tr);
+      });
+    }
+  }
+
+  document.getElementById('overview-back-btn').addEventListener('click', ()=>{
+    if(overviewReturnTo === 'game' && round.active){
+      renderTiles();
+      showScreen('game');
+      if(round.finished) showWinnerOverlay();
+    } else {
+      renderLobby();
+      showScreen('lobby');
+    }
+  });
+
+  document.getElementById('overview-reset-stats-btn').addEventListener('click', ()=>{
+    if(roster.length === 0) return;
+    if(confirm('Siege und verlorene Runden für alle Spieler auf 0 zurücksetzen?')){
+      roster.forEach(p=>{ p.wins = 0; p.losses = 0; });
+      saveState();
+      renderOverview();
+    }
+  });
+
+  document.getElementById('overview-reset-all-btn').addEventListener('click', ()=>{
+    if(confirm('Alle Spieler und die gesamte Statistik unwiderruflich löschen?')){
+      clearAll();
+      renderLobby();
+      showScreen('lobby');
+    }
+  });
+
+  // ---------- init ----------
+  const restored = loadState();
+  if(restored && round.active && round.players.length > 0){
+    renderLobby();
+    goToGame();
+  } else {
+    renderLobby();
+    showScreen('lobby');
+  }
+
+  // ---------- PWA: service worker ----------
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', ()=>{
+      navigator.serviceWorker.register('./sw.js').catch(()=>{ /* offline support unavailable */ });
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
